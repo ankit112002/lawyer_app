@@ -1,16 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:lawyer/auth/login_page.dart';
-import 'package:lawyer/auth/signup_screen.dart';
 import 'package:lawyer/provider/api_provider.dart';
 import 'package:lawyer/provider/car_lease.dart';
-import 'package:lawyer/screens/account/create_account_screen.dart';
-import 'package:lawyer/screens/app_main_screen/app_main_screen.dart';
-import 'package:lawyer/screens/app_main_screen/chat_screen.dart';
-import 'package:lawyer/screens/app_main_screen/chat_toggle_screen.dart';
-import 'package:lawyer/screens/app_main_screen/inner_chat_screen.dart';
-import 'package:lawyer/screens/others/car_sale.dart';
 import 'package:lawyer/splash/splash_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

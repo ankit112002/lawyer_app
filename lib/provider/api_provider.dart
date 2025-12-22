@@ -8,6 +8,7 @@ import '../models/my_model.dart';
 import '../models/signup.dart';
 import '../screens/others/home.dart';
 import '../services/api_services.dart';
+import '../session_controller.dart';
 
 class ApiProvider with ChangeNotifier{
   String accessToken = "";
@@ -260,29 +261,39 @@ class ApiProvider with ChangeNotifier{
     try {
       final response = await ApiService().loginData(email, password);
 
-      if (response.success) {
+      print("RAW RESPONSE => ${response.data}");
+
+      if (response.data["success"] == true) {
         loginSuccess = true;
-        loginMessage = response.message ?? "Login successful";
+        loginMessage = response.data["message"];
 
-        // 👇👇👇 YAHI LINE ADD KARO (MOST IMPORTANT)
-        setToken(response.data["access_token"]);
-        data = response.data["user"]; // 👈 ADD THIS
+        final token = response.data["access_token"];
+        final user = response.data["user"];
 
+        await SessionController.instance.setSession(
+          user["_id"],
+          token,
+        );
 
-        print("LOGIN TOKEN => ${response.data["access_token"]}");
+        setToken(token);
+        data = user;
 
+        print("TOKEN SAVED => $token");
       } else {
         loginSuccess = false;
-        loginMessage = response.message ?? "Login failed";
+        loginMessage = response.data["message"] ?? "Login failed";
       }
-    } catch (e) {
+    } catch (e, s) {
+      print("LOGIN ERROR => $e");
+      print("STACKTRACE => $s");
       loginSuccess = false;
-      loginMessage = "Network error";
+      loginMessage = "Something went wrong";
     }
 
     isLoading = false;
     notifyListeners();
   }
+
 
   //getProfile
   Future<void> getProfileData(String accessToken) async {

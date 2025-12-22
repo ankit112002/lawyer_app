@@ -126,7 +126,7 @@ class _LoginPageState extends State<LoginPage> {
                 },
                 child: api.isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("Login"),
+                    : const Text("Login",style: TextStyle(color: Colors.white),),
               ),
             ),
 
