@@ -54,13 +54,13 @@ class _ChatHistoryState extends State<ChatHistory> {
               return ListTile(
                 leading: const Icon(Icons.chat_bubble_outline),
                 title: Text(chat["chat_name"] ?? "New Chat"),
-               //  title: Text(
-               //    chat["history"].isEmpty
-               //        ? "No messages yet"
-               //        : chat["history"].last["req"] ?? "",
-               //    maxLines: 1,
-               //    overflow: TextOverflow.ellipsis,
-               //  ),
+                //  title: Text(
+                //    chat["history"].isEmpty
+                //        ? "No messages yet"
+                //        : chat["history"].last["req"] ?? "",
+                //    maxLines: 1,
+                //    overflow: TextOverflow.ellipsis,
+                //  ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -86,7 +86,7 @@ class _ChatHistoryState extends State<ChatHistory> {
                                 ),
                                 ElevatedButton(
                                   onPressed: () async {
-                                   // String? email=await AuthService.getSavedEmail();
+                                    // String? email=await AuthService.getSavedEmail();
                                     var pref=await SharedPreferences.getInstance();
                                     var email=pref.getString("email");
 
@@ -149,7 +149,7 @@ class _ChatHistoryState extends State<ChatHistory> {
   }
 
   Future<void> getChatHistory() async{
-   // String? email=await AuthService.getSavedEmail();
+    // String? email=await AuthService.getSavedEmail();
     var pref=await SharedPreferences.getInstance();
     var email=pref.getString("email");
     await Provider.of<ApiProvider>(context,listen: false).getChatHistory(context, email.toString());

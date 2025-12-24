@@ -8,148 +8,255 @@ class WeeklySubcription extends StatefulWidget {
 }
 
 class _WeeklySubcriptionState extends State<WeeklySubcription> {
-  int currentPage=0;
-  PageController pageController=PageController();
-  List<Widget>pages=[
-  ];
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final height = size.height;
+
     return Scaffold(
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 80,left: 20),
-            child: Row(
-              children: [
-                InkWell(
-                    onTap: (){Navigator.pop(context);},
-                    child: Icon(Icons.arrow_back,size: 20,color: Colors.black,fontWeight: FontWeight.bold)),
-                Text(" Back",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),)
-
-
-              ],
-            ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(
+            horizontal: width * 0.05,
+            vertical: height * 0.02,
           ),
-          Padding(
-            padding: const EdgeInsets.only(top: 30,left: 40),
-            child: Image.asset("assets/images/Frame 99 (4).png"),
-          ),
-          SizedBox(height: 50,),
-          Column(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
+              /// 🔙 Back
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Center(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Color(0xFF655F2E), Color(0xFFD3A62A)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+                  InkWell(
+                    onTap: () => Navigator.pop(context),
+                    child: const Icon(Icons.arrow_back, size: 24),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    "Back",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: height * 0.04),
+
+              /// 🔵 Title
+              Text(
+                "Weekly package",
+                style: TextStyle(
+                  fontSize: width * 0.07,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              SizedBox(height: height * 0.015),
+
+              /// 🔤 Description
+              Text(
+                "Avocato's plans provide access to the Ask Avocato feature and the legal search engine, ensuring easy and efficient access to legal information.",
+                style: TextStyle(
+                  fontSize: width * 0.04,
+                  color: Colors.black87,
+                ),
+              ),
+
+              SizedBox(height: height * 0.05),
+
+              /// 🔘 Monthly / Weekly Buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    width: width * 0.42,
+                    height: 52,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Color(0XFFEB4335)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        borderRadius: BorderRadius.circular(8),
                       ),
-                      child: SizedBox(
-                        height: 54,width: 150,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shadowColor: Colors.transparent,
-                            padding: EdgeInsets.symmetric(horizontal: 20),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: Text(
-                            "Monthly",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20, // adjust for small height
-                            ),
-                          ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text(
+                        "Monthly",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   ),
-                  SizedBox(
-                    height: 54,width: 150,
-                    child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            side: BorderSide(
-                              width: 1,
-                              color: Color(0XFFEB4335),
-                            ),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        onPressed: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => WeeklySubcription(),));
-                        }, child: Text("Weekly",style: TextStyle(color: Colors.black,fontSize: 20,fontWeight: FontWeight.bold))),
+                  _gradientButton(
+                    width: width * 0.42,
+                    title: "Weekly",
+                    onTap: () {},
                   ),
-
-
-                ],),
-              SizedBox(height: 30,),
-              Center(
-                child: Image.asset("assets/images/Frame 427320841 (1).png"),
+                ],
               ),
-              
+
+              SizedBox(height: height * 0.05),
+
+              /// 📦 Subscription Card
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  return _subscriptionCard(
+                    constraints: constraints,
+                    title: "Weekly Package",
+                    badge: "Best Value",
+                    price: "₹999",
+                  );
+                },
+              ),
+
+              SizedBox(height: height * 0.12),
             ],
           ),
-        ],
+        ),
       ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        floatingActionButton: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.9,
-          height: 60,
 
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFF655F2E), // black
-                  Color(0xFFD3A62A), // grey-black
-                ],
-
-              ),
+      /// 🔻 Bottom CTA
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: SizedBox(
+        width: width * 0.9,
+        height: 58,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF655F2E), Color(0xFFD3A62A)],
             ),
-
-            child: FloatingActionButton.extended(
-              backgroundColor: Colors.transparent,  // IMPORTANT
-              elevation: 0,                          // No shadow over gradient
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-
-              onPressed: () {
-                if (currentPage < pages.length - 1) {
-                  pageController.nextPage(
-                    duration: Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  );
-                }else{
-                }
-              },
-
-              label: Text(
-                currentPage == pages.length - 1 ? "Begin" : "Subscribe now",
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+          ),
+          child: FloatingActionButton.extended(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            onPressed: () {},
+            label: const Text(
+              "Subscribe now",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
           ),
-        )
+        ),
+      ),
+    );
+  }
+
+  /// 🔹 Responsive Subscription Card
+  Widget _subscriptionCard({
+    required BoxConstraints constraints,
+    required String title,
+    required String price,
+    String? badge,
+    String? description,
+  }) {
+    final width = constraints.maxWidth;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xff655F2E), Color(0xffD3A62A)],
+        ),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: const Color(0xffFBF6EA),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: width * 0.05,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (badge != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xff655F2E), Color(0xffD3A62A)],
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      badge,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                Text(
+                  price,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            if (description != null) ...[
+              const SizedBox(height: 12),
+              Text(
+                description,
+                style: TextStyle(
+                  fontSize: width * 0.038,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 🔹 Gradient Button
+  Widget _gradientButton({
+    required double width,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      width: width,
+      height: 52,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF655F2E), Color(0xFFD3A62A)],
+        ),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+        ),
+        onPressed: onTap,
+        child: Text(
+          title,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
     );
   }
 }

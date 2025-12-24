@@ -2,8 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:lawyer/auth/login_page.dart';
 import 'package:lawyer/screens/account/create_account_screen.dart';
+import 'package:lawyer/screens/app_main_screen/app_main_screen.dart';
 import 'package:lawyer/session_controller.dart';
 import 'package:lawyer/splash/onboarding_screen.dart';
+import 'package:provider/provider.dart';
+
+import '../provider/api_provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -18,24 +22,33 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     _handleNavigation();
+
   }
 
   Future<void> _handleNavigation() async {
+    // Load saved session (token + userId)
     await SessionController.instance.loadSession();
 
+    final token = SessionController.instance.token ?? "";
+
+    if (token.isNotEmpty) {
+      // ✅ Token restore -> ApiProvider me set -> Profile auto fetch
+      final provider = Provider.of<ApiProvider>(context, listen: false);
+      provider.setAccessToken(token);
+    }
+
+    // Wait for 3 seconds splash
     Timer(const Duration(seconds: 3), () {
       if (!mounted) return;
 
       if (SessionController.instance.isLoggedIn) {
-        // ✅ User already logged in
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => const CreateAccountScreen(), // ya Home()
+            builder: (_) => const AppMainScreen(),
           ),
         );
       } else {
-        // ❌ Not logged in
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -45,6 +58,8 @@ class _SplashScreenState extends State<SplashScreen> {
       }
     });
   }
+
+
 
   @override
   Widget build(BuildContext context) {

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:lawyer/screens/account/create_account_screen.dart';
 import 'package:lawyer/screens/app_main_screen/chat_screen.dart';
@@ -10,7 +9,7 @@ import '../screens/others/home.dart';
 import '../services/api_services.dart';
 import '../session_controller.dart';
 
-class ApiProvider with ChangeNotifier{
+class ApiProvider with ChangeNotifier {
   String accessToken = "";
   Map<String, dynamic>? data;
 
@@ -19,32 +18,34 @@ class ApiProvider with ChangeNotifier{
     print("TOKEN SAVED => $accessToken");
     notifyListeners();
   }
+
   bool loginSuccess = false;
   String loginMessage = "";
 
-  bool isLoading=false;
+  bool isLoading = false;
   Model? model;
   String apiResponse = "";
-  getdata(BuildContext context,String email) async{
-    isloading=true;
+  getdata(BuildContext context, String email) async {
+    isloading = true;
     notifyListeners();
     await ApiService().getdata(email).then((value) {
       if (value != null) {
         model = value;
         print("value: $model");
         print(model?.chatId ?? "chatId null");
-         Navigator.push(context, MaterialPageRoute(builder: (context) => ChatScreen(
-             chat_id:model!.chatId.toString()
-         ),));
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChatScreen(chat_id: model!.chatId.toString()),
+          ),
+        );
       } else {
         print("API returned NULL");
       }
       isloading = false;
       notifyListeners();
     });
-
   }
-
   List selectedChatHistory = [];
   // bool isLoading = false;
 
@@ -147,22 +148,31 @@ class ApiProvider with ChangeNotifier{
   }
 
   //editQuestion
-  updateQuestion(String email,String chat_id,String history_id,String new_question) async{
+  updateQuestion(
+    String email,
+    String chat_id,
+    String history_id,
+    String new_question,
+  ) async {
     isloading = true;
     notifyListeners();
 
-    final response = await ApiService().editQustion(email, chat_id, history_id, new_question);
-
+    final response = await ApiService().editQustion(
+      email,
+      chat_id,
+      history_id,
+      new_question,
+    );
 
     if (response != null) {
-
       // 🔥 Find chat index
       int chatIndex = chatList.indexWhere((e) => e["chat_id"] == chat_id);
 
       if (chatIndex != -1) {
         // 🔥 Find history index
-        int historyIndex = chatList[chatIndex]["history"]
-            .indexWhere((h) => h["history_id"] == history_id);
+        int historyIndex = chatList[chatIndex]["history"].indexWhere(
+          (h) => h["history_id"] == history_id,
+        );
 
         if (historyIndex != -1) {
           // 🔥 Update question in local list
@@ -174,6 +184,7 @@ class ApiProvider with ChangeNotifier{
     isloading = false;
     notifyListeners();
   }
+
   bool isloading = false;
 
   // For Email API
@@ -202,7 +213,9 @@ class ApiProvider with ChangeNotifier{
     emailMessage = response.message;
     emailSuccess = response.success;
 
-    print("EMAIL API → Success: ${response.success}, Message: ${response.message}");
+    print(
+      "EMAIL API → Success: ${response.success}, Message: ${response.message}",
+    );
 
     notifyListeners();
   }
@@ -238,6 +251,23 @@ class ApiProvider with ChangeNotifier{
     if (response.success) {
       signupModel = response.data as SignupModel;
       print("SIGNUP SUCCESS → ${signupModel?.message}");
+
+      final token = signupModel?.accessToken ?? "";
+      final user = signupModel?.user;
+
+      if (token.isNotEmpty && user != null) {
+        // 🔥 Safe ID access for your User model
+        final userId = user.sId ?? user.id ?? "";
+        if (userId.isNotEmpty) {
+          // Save session
+          await SessionController.instance.setSession(userId, token);
+
+          // 🔥 AUTO FETCH PROFILE
+          setAccessToken(token);
+        } else {
+          print("ERROR: User ID not found in signup response!");
+        }
+      }
     } else {
       signupModel = null;
       print("SIGNUP ERROR → ${response.message}");
@@ -245,10 +275,11 @@ class ApiProvider with ChangeNotifier{
 
     notifyListeners();
   }
+
   //login
   // -------------------------
-// LOGIN API
-// -------------------------
+  // LOGIN API
+  // -------------------------
   Future<void> loginData(
       BuildContext context,
       String email,
@@ -268,17 +299,16 @@ class ApiProvider with ChangeNotifier{
         loginMessage = response.data["message"];
 
         final token = response.data["access_token"];
-        final user = response.data["user"];
+        final user  = response.data["user"];
 
-        await SessionController.instance.setSession(
-          user["_id"],
-          token,
-        );
+        // 🔥 SESSION SAVE
+        await SessionController.instance.setSession(user["_id"], token);
 
-        setToken(token);
-        data = user;
+        // 🔥 MOST IMPORTANT LINE (AUTO PROFILE FETCH)
+        setAccessToken(token);
 
         print("TOKEN SAVED => $token");
+
       } else {
         loginSuccess = false;
         loginMessage = response.data["message"] ?? "Login failed";
@@ -296,26 +326,41 @@ class ApiProvider with ChangeNotifier{
 
 
   //getProfile
-  Future<void> getProfileData(String accessToken) async {
 
+  bool isAuthLoading = false;
+  bool isProfileLoading = false;
+
+  // 🔥 SET TOKEN (LOGIN / SIGNUP / RESTORE)
+  void setAccessToken(String token) {
+    accessToken = token;
+    notifyListeners();
+
+    // AUTO FETCH PROFILE
+    getProfileData();
+  }
+
+  // 🔥 PROFILE API
+  Future<void> getProfileData() async {
     if (accessToken.isEmpty) return;
 
-    isLoading = true;
+    isProfileLoading = true;
     notifyListeners();
 
     ApiResponse response = await ApiService().profileData(accessToken);
 
-    isLoading = false;
+    isProfileLoading = false;
 
     if (response.success) {
       data = response.data;
-      print("PROFILE SUCCESS → ${response.message}");
+      debugPrint("PROFILE SUCCESS");
     } else {
-      print("PROFILE ERROR → ${response.message}");
+      debugPrint("PROFILE ERROR → ${response.message}");
     }
 
     notifyListeners();
   }
+
+  // 🔥 UPDATE PROFILE
   //update Profile
   Future<void> updateProfile(
       String firstName,
@@ -351,7 +396,5 @@ class ApiProvider with ChangeNotifier{
     isLoading = false;
     notifyListeners();
   }
-
-
 
 }

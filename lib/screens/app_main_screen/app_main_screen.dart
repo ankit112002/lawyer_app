@@ -18,6 +18,8 @@ class AppMainScreen extends StatefulWidget {
 
 class _AppMainScreenState extends State<AppMainScreen> {
   int currentIndex = 0;
+  bool isLoading = false;
+
 
   final List<Widget> _pages = [
     SearchScreen(),
@@ -121,102 +123,126 @@ class _AppMainScreenState extends State<AppMainScreen> {
       },
     );
   }
+  Future<void> _onAiTap() async {
+    if (isLoading) return;
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final pref = await SharedPreferences.getInstance();
+      final email = pref.getString("email");
+
+      if (email == null || email.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Email not found. Please login again.")),
+        );
+        return;
+      }
+
+      final apiProvider = Provider.of<ApiProvider>(context, listen: false);
+      await apiProvider.getdata(context, email);
+
+      if (apiProvider.model == null || apiProvider.model!.chatId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Failed to create chat. Try again.")),
+        );
+        return;
+      }
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              ChatScreen(chat_id: apiProvider.model!.chatId.toString()),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Something went wrong")),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[currentIndex],
+    return Stack(
+      children: [
+        Scaffold(
+          body: _pages[currentIndex],
 
-      bottomNavigationBar: Container(
-        height: 90,
-        decoration: BoxDecoration(
-          color: Color(0XFF655F2E),
-        ),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                buildNavItems(Icons.search, "Search", 0),
-                SizedBox(width: 70),
-                buildNavItems(Icons.home, "Home", 1),
-              ],
+          bottomNavigationBar: Container(
+            height: 90,
+            decoration: const BoxDecoration(
+              color: Color(0XFF655F2E),
             ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    buildNavItems(Icons.search, "Search", 0),
+                    const SizedBox(width: 70),
+                    buildNavItems(Icons.home, "Home", 1),
+                  ],
+                ),
 
-            Positioned(
-              top: -50,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () {
-                    showSubscriptionPopup();
-                  },
-                  child: Container(
-                    height: 110,
-                    width: 110,
-                    alignment: Alignment.center,
-                    child: CircleAvatar(
-                      radius: 50,
-                      backgroundColor: Color(0XFFFBF6EA),
+                Positioned(
+                  top: -50,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Container(
+                      height: 110,
+                      width: 110,
+                      alignment: Alignment.center,
                       child: CircleAvatar(
-                        radius: 30,
-                        backgroundColor: Color(0XFFFBF6EA),
-                        child: InkWell(
-                          onTap: () async {
-                            final pref = await SharedPreferences.getInstance();
-                            final email = pref.getString("email");
-
-                            // 1️⃣ Email validation
-                            if (email == null || email.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text("Email not found. Please login again.")),
-                              );
-                              return;
-                            }
-
-                            final apiProvider = Provider.of<ApiProvider>(context, listen: false);
-
-                            // 2️⃣ Call API
-                            await apiProvider.getdata(context, email);
-
-                            // 3️⃣ Model null safety
-                            if (apiProvider.model == null || apiProvider.model!.chatId == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text("Failed to create chat. Try again.")),
-                              );
-                              return;
-                            }
-
-                            // 4️⃣ Safe navigation
-                            final chatId = apiProvider.model!.chatId.toString();
-
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ChatScreen(chat_id: chatId),
-                              ),
-                            );
-                          },
-
-                          child: Image.asset(
-                            "assets/images/AI avacato logo.png",
-                            height: 100,
+                        radius: 50,
+                        backgroundColor: const Color(0XFFFBF6EA),
+                        child: CircleAvatar(
+                          radius: 30,
+                          backgroundColor: const Color(0XFFFBF6EA),
+                          child: InkWell(
+                            onTap: _onAiTap, // 👈 UPDATED
+                            child: Image.asset(
+                              "assets/images/AI avacato logo.png",
+                              height: 100,
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
                 ),
+              ],
+            ),
+          ),
+        ),
+
+        // 🔥 FULL SCREEN LOADER
+        if (isLoading)
+          Container(
+            color: Colors.black.withOpacity(0.4),
+            child: const Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 4,
+                color: Colors.white,
               ),
             ),
-          ],
-        ),
-      ),
+          ),
+      ],
     );
   }
+
 
   Widget buildNavItems(IconData icon, String label, int index) {
     return InkWell(

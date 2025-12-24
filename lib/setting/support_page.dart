@@ -47,7 +47,7 @@ class _SupportPageState extends State<SupportPage> {
 
               Center(
                 child: Text(
-                  "Create a new account",
+                  "Contact Here",
                   style: TextStyle(fontSize: w(24), fontWeight: FontWeight.bold),
                 ),
               ),

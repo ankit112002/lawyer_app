@@ -355,30 +355,32 @@ class ApiService {
   //get Profile
   Future<ApiResponse> profileData(String accessToken) async {
     try {
-      var url = Uri.parse(
-        "https://yehia-api-nest.vkapsprojects.com/users/profile",
-      );
+      var url = Uri.parse("https://yehia-api-nest.vkapsprojects.com/users/profile");
 
       final response = await http.get(
         url,
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer $accessToken", // <-- MUST HAVE
+          "Authorization": "Bearer $accessToken",
         },
       );
 
       print("STATUS CODE: ${response.statusCode}");
       print("RESPONSE BODY: ${response.body}");
 
-      var body = jsonDecode(response.body);
+      final body = jsonDecode(response.body);
+
+      // API might return user data inside a nested object, adjust if needed
+      final data = body["data"] ?? body;
 
       return ApiResponse(
         success: response.statusCode == 200,
-        data: body,
+        data: data,
         message: extractMessage(body["message"]),
         statusCode: response.statusCode,
       );
     } catch (e) {
+      print("PROFILE ERROR: $e");
       return ApiResponse(
         success: false,
         data: null,
@@ -387,6 +389,7 @@ class ApiService {
       );
     }
   }
+
   //profile Update
   Future<ApiResponse> profileUpdate(
       String firstName,
@@ -395,15 +398,13 @@ class ApiService {
       String accessToken,
       ) async {
     try {
-      var url = Uri.parse(
-        "https://yehia-api-nest.vkapsprojects.com/users/profile",
-      );
+      var url = Uri.parse("https://yehia-api-nest.vkapsprojects.com/users/profile");
 
       final response = await http.patch(
         url,
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer $accessToken", // ✅ ONLY HERE
+          "Authorization": "Bearer $accessToken",
         },
         body: jsonEncode({
           "firstName": firstName,
@@ -416,15 +417,19 @@ class ApiService {
       print("STATUS CODE => ${response.statusCode}");
       print("RESPONSE BODY => ${response.body}");
 
-      var body = jsonDecode(response.body);
+      final body = jsonDecode(response.body);
+
+      // Some APIs return updated user in `data`, adjust if necessary
+      final data = body["data"] ?? body;
 
       return ApiResponse(
         success: body["success"] == true,
-        data: body,
+        data: data,
         message: extractMessage(body["message"]),
         statusCode: response.statusCode,
       );
     } catch (e) {
+      print("UPDATE PROFILE ERROR: $e");
       return ApiResponse(
         success: false,
         data: null,
@@ -433,6 +438,7 @@ class ApiService {
       );
     }
   }
+
   //pdf
   Future<ApiResponse> pdfData(CarLeasePdfRequest request) async {
     try {

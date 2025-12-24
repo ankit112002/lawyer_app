@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lawyer/provider/api_provider.dart';
+import 'package:lawyer/screens/app_main_screen/app_main_screen.dart';
 import 'package:lawyer/screens/others/chat_history.dart';
 import 'package:lawyer/services/auth_services.dart';
 import 'package:lawyer/utility/custom_container_for_chat.dart';
@@ -141,7 +142,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               onTap: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => ChatScreen(chat_id: '')),
+                  MaterialPageRoute(builder: (context) =>AppMainScreen()),
                 );
               },
             ),
@@ -152,49 +153,60 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => ChatHistory(),));
               },
             ),
-            ListTile(
-              leading: Icon(Icons.title),
-              title: Text("Chat Names"),
-              onTap: () {},
-            ),
-            Divider(),
-            ListTile(
-              leading: Icon(Icons.logout),
-              title: Text("Logout"),
-              onTap: () {},
-            ),
+            // ListTile(
+            //   leading: Icon(Icons.logout),
+            //   title: Text("Logout"),
+            //   onTap: () {},
+            // ),
           ],
         ),
       ),
+      //        backgroundColor: Color(0XFF655F2E),
       backgroundColor: Color(0xFFF7F6F2),
       appBar: AppBar(
-        backgroundColor: Color(0XFF655F2E),
+        backgroundColor: const Color(0XFF655F2E),
         automaticallyImplyLeading: false,
-        title: Row(
-          children: [
-            GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Row(
-                children: [
-                  Icon(Icons.arrow_back, size: 20, color: Colors.white),
-                  SizedBox(width: 8),
-                  Text("Back", style: TextStyle(fontSize: 18, color: Colors.white)),
-                ],
-              ),
+
+        leadingWidth: 90, // 🔥 IMPORTANT FIX
+
+        leading: InkWell(
+          onTap: () => Navigator.pop(context),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Icon(Icons.arrow_back, size: 20, color: Colors.white),
+                SizedBox(width: 6),
+                Text(
+                  "Back",
+                  style: TextStyle(fontSize: 16, color: Colors.white),
+                ),
+              ],
             ),
-            Expanded(
-              child: Center(
-                child: Text("Ask a lawyer", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
-              ),
-            ),
-            IconButton(
-              onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-              icon: Icon(Icons.list_outlined, size: 26, color: Colors.white),
-            )
-          ],
+          ),
         ),
+
+        title: const Text(
+          "Ask a lawyer",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
+
+        actions: [
+          IconButton(
+            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+            icon: const Icon(Icons.list_outlined, size: 26, color: Colors.white),
+          ),
+        ],
       ),
-      body: SafeArea(
+
+
+        body: SafeArea(
         child: Column(
           children: [
             // Header area with intro and quick cards
