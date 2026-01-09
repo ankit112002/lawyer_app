@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:lawyer/screens/others/pdf_preview.dart';
+import 'package:lawyer/pdf/pdf_preview.dart';
 import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 
-import '../../models/notorization.dart';
-import '../../models/request_model.dart';
-import '../../models/supporting.dart';
-import '../../models/vehicle.dart';
-import '../../pdf/car_sale_pdf.dart';
-import '../../provider/car_lease.dart';
+import '../models/notorization.dart';
+import '../models/request_model.dart';
+import '../models/supporting.dart';
+import '../models/vehicle.dart';
+import 'car_sale_pdf.dart';
+import '../provider/car_lease.dart';
 
 class CarSale extends StatefulWidget {
   const CarSale({super.key});

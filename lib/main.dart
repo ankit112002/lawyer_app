@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:lawyer/auth/signup_screen.dart';
+import 'package:lawyer/provider/MovablePdfProvider.dart';
 import 'package:lawyer/provider/api_provider.dart';
 import 'package:lawyer/provider/car_lease.dart';
+import 'package:lawyer/provider/company_contract_provider.dart';
+import 'package:lawyer/provider/email_verify.dart';
+import 'package:lawyer/provider/property_sale_pdf.dart';
 import 'package:lawyer/splash/splash_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -15,7 +20,12 @@ void main() async{
 
   runApp(MultiProvider(
       providers: [ChangeNotifierProvider(create: (_)=>ApiProvider()),
-      ChangeNotifierProvider(create: (_)=>CarLeasePdfProvider())],
+      ChangeNotifierProvider(create: (_)=>CarLeasePdfProvider()),
+      ChangeNotifierProvider(create: (_)=>PropertyPdfProvider()),
+        ChangeNotifierProvider(create: (_)=>MovablePdfProvider()),
+        ChangeNotifierProvider(create: (_)=>EmailVerifyProvider()),
+        ChangeNotifierProvider(create: (_)=>CompanyContractPdfProvider())
+      ],
       child: const MyApp()));
 }
 

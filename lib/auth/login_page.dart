@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:lawyer/auth/email_verification.dart';
 import 'package:lawyer/auth/signup_page.dart';
 import 'package:lawyer/screens/account/create_account_screen.dart';
+import 'package:lawyer/screens/app_main_screen/app_main_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../provider/api_provider.dart';
@@ -14,6 +16,15 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      Provider.of<ApiProvider>(context, listen: false).resetLoginState();
+    });
+  }
+
   TextEditingController emailController = TextEditingController();
   TextEditingController passController = TextEditingController();
 
@@ -25,8 +36,10 @@ class _LoginPageState extends State<LoginPage> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: const Color(0XFF655F2E),
+
         centerTitle: true,
-        title: const Text("Login"),
+        title: const Text("Login",style: TextStyle(color: Colors.white),),
       ),
 
       body: SingleChildScrollView(
@@ -118,7 +131,7 @@ class _LoginPageState extends State<LoginPage> {
                     if (context.mounted) {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => CreateAccountScreen()),
+                        MaterialPageRoute(builder: (context) => AppMainScreen()),
                       );
                     }
 
@@ -145,7 +158,7 @@ class _LoginPageState extends State<LoginPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const SignupPage()),
+                          builder: (context) => const EmailVerification()),
                     );
                   },
                   child: const Text(

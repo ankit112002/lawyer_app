@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:lawyer/screens/others/car_sale.dart';
+import 'package:lawyer/auth/login_page.dart';
+import 'package:lawyer/pdf/agreement_list.dart';
+import 'package:lawyer/pdf/car_sale.dart';
+import 'package:lawyer/pdf/movable_lease.dart';
+import 'package:lawyer/screens/subcription/monthly_subcription.dart';
+import 'package:lawyer/session_controller.dart';
 import 'package:lawyer/setting/profile_page.dart';
 import 'package:lawyer/screens/subcription/subcription_page.dart';
 import 'package:lawyer/setting/support_page.dart';
+import 'package:provider/provider.dart';
+
+import '../provider/api_provider.dart';
+import '../pdf/property_sale.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -12,6 +21,35 @@ class SettingPage extends StatefulWidget {
 }
 
 class _SettingPageState extends State<SettingPage> {
+  Future<bool?> showLogoutDialog(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Confirm Logout"),
+          content: const Text("Are you sure you want to logout?"),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+              ),
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text("Logout",style: TextStyle(color: Colors.white),),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     double h = MediaQuery.of(context).size.height;
@@ -54,13 +92,38 @@ class _SettingPageState extends State<SettingPage> {
             ),
 
             menuItem(
-              title: "Car Sale",
-              icon: Icons.subscriptions,
+              title: "Agreements",
+              icon: Icons.car_rental,
               textScale: textScale,
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => CarSale(),));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => AgreementPage(),));
               },
             ),
+            // menuItem(
+            //   title: "Property Sale",
+            //   icon: Icons.house_siding_sharp,
+            //   textScale: textScale,
+            //   onTap: () {
+            //     Navigator.push(context, MaterialPageRoute(builder: (context) => PropertySale(),));
+            //   },
+            // ),
+            // menuItem(
+            //   title: "Movable Lease Agreement",
+            //   icon: Icons.bedroom_parent_sharp,
+            //   textScale: textScale,
+            //   onTap: () {
+            //     Navigator.push(context, MaterialPageRoute(builder: (context) => MovableLease(),));
+            //   },
+            // ),
+            menuItem(
+              title: "Subscription",
+              icon: Icons.person_pin_circle,
+              textScale: textScale,
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => MonthlySubcription(),));
+              },
+            ),
+
 
             menuItem(
               title: "Support",
@@ -87,40 +150,63 @@ class _SettingPageState extends State<SettingPage> {
 
             const Spacer(),
 
-            SizedBox(
-              width: w * 0.65,
-              height: 55 * (h / 800),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    side: const BorderSide(width: 1, color: Color(0XFFEB4335)),
-                    borderRadius: BorderRadius.circular(12 * (w / 390)),
-                  ),
-                ),
-                onPressed: () {},
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.exit_to_app, color: Colors.red, size: 20),
-                    SizedBox(width: 8 * (w / 390)),
-                    Text(
-                      "Log Out",
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontSize: 20 * textScale,
-                      ),
-                    ),
-                  ],
+        Consumer<ApiProvider>(
+          builder: (context, provider, _) {
+            return ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  side: const BorderSide(width: 1, color: Color(0XFFEB4335)),
+                  borderRadius: BorderRadius.circular(12 * (w / 390)),
                 ),
               ),
-            ),
-            SizedBox(height: 30 * (h / 800)),
+
+              onPressed: provider.isLoggingOut
+                  ? null
+                  : () async {
+                final confirm = await showLogoutDialog(context);
+
+                if (confirm == true) {
+                  await provider.logout(context);
+                }
+              },
+
+              child: provider.isLoggingOut
+                  ? const SizedBox(
+                height: 22,
+                width: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.red,
+                ),
+              )
+                  : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.exit_to_app,
+                      color: Colors.red, size: 20),
+                  SizedBox(width: 8 * (w / 390)),
+                  Text(
+                    "Log Out",
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 20 * textScale,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+
+
+        SizedBox(height: 30 * (h / 800)),
           ],
         ),
       ),
     );
+
   }
 
   Widget menuItem({

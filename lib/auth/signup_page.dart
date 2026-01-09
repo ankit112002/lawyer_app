@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lawyer/auth/email_otp.dart';
 import 'package:lawyer/screens/account/create_account_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,6 +19,8 @@ class _SignupPageState extends State<SignupPage> {
   TextEditingController lastNameController = TextEditingController();
   TextEditingController passController = TextEditingController();
   TextEditingController otpController = TextEditingController();
+  bool _obscurePassword = true;
+
 
   List<String> typeList = [
     'Individual',
@@ -32,18 +35,32 @@ class _SignupPageState extends State<SignupPage> {
 
   String selectedType = 'Individual';
 
+
+
   @override
   Widget build(BuildContext context) {
     final api = Provider.of<ApiProvider>(context);
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
-
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text("Sign Up"),
-      ),
-
+    return WillPopScope(
+        onWillPop: () async {
+          // Prevent back navigation
+          // Or navigate to LoginPage if needed
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const EmailOtp()),
+          );
+          return false; // Prevent default back
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: const Color(0XFF655F2E),
+            iconTheme: const IconThemeData(
+              color: Colors.white, // Back button color
+            ),
+            centerTitle: true,
+            title: const Text("Sign Up", style: TextStyle(color: Colors.white)),
+          ),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: width * 0.06),
         child: Column(
@@ -89,27 +106,40 @@ class _SignupPageState extends State<SignupPage> {
             // PASSWORD
             TextField(
               controller: passController,
-              obscureText: true,
+              obscureText: _obscurePassword,
               decoration: InputDecoration(
                 labelText: "Password",
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    });
+                  },
+                ),
               ),
             ),
+
 
             SizedBox(height: height * 0.02),
 
             // OTP
-            TextField(
-              controller: otpController,
-              decoration: InputDecoration(
-                labelText: "OTP",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
+            // TextField(
+            //   controller: otpController,
+            //   decoration: InputDecoration(
+            //     labelText: "OTP",
+            //     border: OutlineInputBorder(
+            //       borderRadius: BorderRadius.circular(12),
+            //     ),
+            //   ),
+            // ),
 
             SizedBox(height: height * 0.02),
 
@@ -155,26 +185,22 @@ class _SignupPageState extends State<SignupPage> {
               width: width,
               height: height * 0.065,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green),
                 onPressed: api.isLoading
                     ? null
                     : () async {
-                  // Validation
+                  final pref = await SharedPreferences.getInstance();
+                  // final otp = pref.getString("email_otp");
+
                   if (firstNameController.text.isEmpty ||
                       lastNameController.text.isEmpty ||
-                      passController.text.isEmpty ||
-                      otpController.text.isEmpty) {
+                      passController.text.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("All fields are required"),
-                      ),
+                      const SnackBar(content: Text("All fields are required")),
                     );
                     return;
                   }
 
-                  var pref = await SharedPreferences.getInstance();
-                  var email = pref.getString("email");
+                  final email = pref.getString("email");
 
                   await api.signUpData(
                     firstNameController.text,
@@ -182,54 +208,99 @@ class _SignupPageState extends State<SignupPage> {
                     email.toString(),
                     passController.text,
                     selectedType,
-                    otpController.text,
                   );
+
+                  if (!mounted) return;
 
                   if (api.signupSuccess) {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const CreateAccountScreen()),
+                        builder: (_) => const CreateAccountScreen(),
+                      ),
                     );
                   }
                 },
-                child: api.isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("Sign Up"),
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Ink(
+                  decoration: BoxDecoration(
+                    gradient: api.isLoading
+                        ? const LinearGradient(
+                      colors: [Colors.grey, Colors.grey],
+                    )
+                        : const LinearGradient(
+                      colors: [
+                        Color(0xFF655F2E),
+                        Color(0xFFD3A62A),
+                      ],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Container(
+                    alignment: Alignment.center,
+                    child: api.isLoading
+                        ? const SizedBox(
+                      height: 22,
+                      width: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                        : const Text(
+                      "Sign Up",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
 
             SizedBox(height: height * 0.02),
 
             // LOGIN TEXT
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text("Already have an account?",
-                    style: TextStyle(fontSize: 16)),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const LoginPage()));
-                  },
-                  child: const Text(
-                    " Login",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.blue,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.center,
+            //   children: [
+            //     const Text("Already have an account?",
+            //         style: TextStyle(fontSize: 16)),
+            //     GestureDetector(
+            //       onTap: () {
+            //         Navigator.pushReplacement(
+            //             context,
+            //             MaterialPageRoute(
+            //                 builder: (_) => const LoginPage()));
+            //       },
+            //       child: const Text(
+            //         " Login",
+            //         style: TextStyle(
+            //           fontSize: 16,
+            //           color: Colors.blue,
+            //           fontWeight: FontWeight.bold,
+            //         ),
+            //       ),
+            //     ),
+            //   ],
+            // ),
 
             SizedBox(height: height * 0.03),
           ],
         ),
       ),
-    );
+    ));
+
   }
 }

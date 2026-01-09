@@ -71,7 +71,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   tags: const ['sari', 'System', '+4'],
                 ),
 
-                const SizedBox(height: 30),
+                const SizedBox(height: 50),
               ],
             ),
           ),

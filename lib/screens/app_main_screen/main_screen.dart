@@ -24,6 +24,8 @@ class _MainScreenState extends State<MainScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false, // 🔴 back button remove
+
         actions: [
           IconButton(
             onPressed: () => Navigator.push(
@@ -40,22 +42,25 @@ class _MainScreenState extends State<MainScreen> {
           padding: EdgeInsets.symmetric(horizontal: w(16)),
           child: Column(
             children: [
-              SizedBox(height: h(10)),
+              SizedBox(height: h(15)),
 
               _promotionCard(),
-              SizedBox(height: h(20)),
+              SizedBox(height: h(25)),
 
               _updateBanner(),
-              SizedBox(height: h(20)),
+              SizedBox(height: h(25)),
 
               _askAvocatoBox(),
               SizedBox(height: h(25)),
+
 
               Image.asset(
                 "assets/images/Frame 427320884.png",
                 height: h(220),
                 fit: BoxFit.contain,
               ),
+              SizedBox(height: h(50)),
+
             ],
           ),
         ),

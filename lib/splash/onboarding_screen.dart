@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:lawyer/auth/email_verification.dart';
 import 'package:lawyer/models/onboarding_model.dart';
@@ -12,8 +14,41 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  PageController pageController = PageController();
+  final PageController pageController = PageController();
   int currentPage = 0;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    startAutoScroll();
+  }
+
+  void startAutoScroll() {
+    _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
+      if (!mounted) return;   // 👈 YAHAN add karna hai
+
+      if (currentPage < data.length - 1) {
+        currentPage++;
+        pageController.animateToPage(
+          currentPage,
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeInOut,
+        );
+      } else {
+        timer.cancel();
+      }
+    });
+  }
+
+
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +72,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     setState(() {
                       currentPage = value;
                     });
+
                   },
+
                   itemBuilder: (context, index) {
                     return Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -69,12 +106,33 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           ),
                         ),
 
-                        SizedBox(height: height * 0.05),
+                        // SizedBox(height: height * 0.05),
+                        //
+                        // SizedBox(
+                        //   height: height * 0.15,
+                        //   child: Image.asset(data[index]['image2']!),
+                        // ),
+                        SizedBox(height: height * 0.10),
 
-                        SizedBox(
-                          height: height * 0.15,
-                          child: Image.asset(data[index]['image2']!),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(
+                            data.length,
+                                (index) => AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              margin: const EdgeInsets.symmetric(horizontal: 4),
+                              width: currentPage == index ? 22 : 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: currentPage == index
+                                    ? const Color(0xFFD3A62A)
+                                    : Colors.grey.shade400,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
                         ),
+
                       ],
                     );
                   },
@@ -107,6 +165,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               borderRadius: BorderRadius.circular(15),
             ),
             onPressed: () {
+              _timer?.cancel();   // 👈 YAHAN add karna hai
+
               if (currentPage < data.length - 1) {
                 pageController.nextPage(
                   duration: const Duration(milliseconds: 300),
@@ -115,13 +175,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               } else {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const EmailVerification()),
+                  MaterialPageRoute(builder: (context) => const SignupScreen()),
                 );
               }
             },
 
+
             label: Text(
-              currentPage == data.length - 1 ? "Start exploring" : "Next",
+              currentPage == data.length - 1 ? "Skip" : "Next",
               style: TextStyle(
                 fontSize: height * 0.025,
                 fontWeight: FontWeight.bold,

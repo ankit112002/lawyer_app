@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:lawyer/auth/login_screen.dart';
 import 'package:lawyer/screens/account/create_account_screen.dart';
 import 'package:lawyer/screens/app_main_screen/chat_screen.dart';
 import 'package:provider/provider.dart';
 
+import '../auth/login_page.dart';
 import '../models/my_model.dart';
 import '../models/signup.dart';
 import '../screens/others/home.dart';
@@ -18,6 +20,48 @@ class ApiProvider with ChangeNotifier {
     print("TOKEN SAVED => $accessToken");
     notifyListeners();
   }
+  void resetLoginState() {
+    loginSuccess = false;
+    loginMessage = "";
+    isLoading = false;
+    notifyListeners();
+  }
+  void setLoading(bool value) {
+    isLoading = value;
+    notifyListeners();
+  }
+  void clearEmailMessage() {
+    emailMessage = "";
+    emailSuccess = false;
+    notifyListeners();
+  }
+  bool _isLoggingOut = false;
+
+  bool get isLoggingOut => _isLoggingOut;
+
+  Future<void> logout(BuildContext context) async {
+    _isLoggingOut = true;
+    notifyListeners();
+
+    await SessionController.instance.clearSession();
+    resetLoginState();
+
+    _isLoggingOut = false;
+    notifyListeners();
+
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Logout Successfully")),
+    );
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (_) => false,
+    );
+  }
+
 
   bool loginSuccess = false;
   String loginMessage = "";
@@ -47,29 +91,51 @@ class ApiProvider with ChangeNotifier {
     });
   }
   List selectedChatHistory = [];
-  // bool isLoading = false;
+  List chatList = [];
 
-  Future<void> getChatData(String email, String chat_id, String question) async {
+  Future<void> getChatData(
+      String email,
+      String chat_id,
+      String question,
+      ) async {
     isLoading = true;
     notifyListeners();
 
-    // 1️⃣ User message add
-    selectedChatHistory.add({"req": question, "res": null});
+    // 1️⃣ User message add (Chat Screen)
+    selectedChatHistory.add({
+      "req": question,
+      "res": null,
+    });
     notifyListeners();
 
-    // 2️⃣ Call API
-    final value = await ApiService().getQuestion(email, chat_id, question);
+    // 2️⃣ API call
+    final value = await ApiService().getQuestion(
+      email,
+      chat_id,
+      question,
+    );
 
     // 3️⃣ Update response
     if (value != null && value["response"] != null) {
-      // Last message response update
-      selectedChatHistory[selectedChatHistory.length - 1]["res"] = value["response"];
-      notifyListeners();
+      selectedChatHistory.last["res"] = value["response"];
+    }
+
+    // 🔥 4️⃣ UPDATE CHAT LIST (Drawer / History)
+    final index = chatList.indexWhere(
+          (e) => e["chat_id"] == chat_id,
+    );
+
+    if (index != -1) {
+      chatList[index]["chat_name"] =
+          chatList[index]["chat_name"] ?? question;
+
+      chatList[index]["updated_at"] = DateTime.now().toString();
     }
 
     isLoading = false;
-    notifyListeners();
+    notifyListeners(); // 🔥 MOST IMPORTANT
   }
+
 
   void loadChatById(String chatId) {
     try {
@@ -83,7 +149,7 @@ class ApiProvider with ChangeNotifier {
 
 
 
-  List chatList = [];
+
 
   getChatHistory(BuildContext context,String email) async {
     isloading = true;
@@ -229,7 +295,7 @@ class ApiProvider with ChangeNotifier {
       String email,
       String password,
       String userType,
-      String otp,
+      // String otp,
       ) async {
     isLoading = true;
     notifyListeners();
@@ -240,7 +306,7 @@ class ApiProvider with ChangeNotifier {
       email,
       password,
       userType,
-      otp,
+      // otp,
     );
 
     isLoading = false;

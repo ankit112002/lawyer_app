@@ -84,7 +84,7 @@ class _MonthlySubcriptionState extends State<MonthlySubcription> {
                         ),
                       ),
                       onPressed: () {
-                        Navigator.push(
+                        Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
                             builder: (_) => const WeeklySubcription(),

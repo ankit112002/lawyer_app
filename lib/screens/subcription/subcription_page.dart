@@ -10,6 +10,20 @@ class SubcriptionPage extends StatefulWidget {
 }
 
 class _SubcriptionPageState extends State<SubcriptionPage> {
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => MonthlySubcription()),
+      );
+    });
+  }
+
+
   int currentPage = 0;
   PageController pageController = PageController();
 

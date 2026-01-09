@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'monthly_subcription.dart';
+
 class WeeklySubcription extends StatefulWidget {
   const WeeklySubcription({super.key});
 
@@ -78,7 +80,11 @@ class _WeeklySubcriptionState extends State<WeeklySubcription> {
                         ),
                       ),
                       onPressed: () {
-                        Navigator.pop(context);
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (_) => MonthlySubcription()),
+                        );
+
                       },
                       child: const Text(
                         "Monthly",

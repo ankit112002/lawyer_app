@@ -96,7 +96,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
               SizedBox(height: h * 0.03),
               Text(
-                "The lawyer",
+                "AI-AVOCATO",
                 style: TextStyle(
                   fontSize: 50 * textScale,
                   fontWeight: FontWeight.bold,

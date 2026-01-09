@@ -9,7 +9,7 @@ final List<Map<String, String>> data = [
     'image':'assets/icons/books-notes-student_svgrepo.com.png',
     'title':'Contract support',
     'subtitle':'Accessing templates and verifying contracts',
-    'image2':'assets/images/Frame 28 (1).png'
+    'image2':'assets/images/Frame 28 (2).png'
   },
   {
     'image':'assets/icons/books_svgrepo.com.png',

@@ -4,6 +4,7 @@ import 'package:lawyer/provider/api_provider.dart';
 import 'package:lawyer/screens/app_main_screen/chat_screen.dart';
 import 'package:lawyer/screens/app_main_screen/main_screen.dart';
 import 'package:lawyer/screens/app_main_screen/search_screen.dart';
+import 'package:lawyer/screens/subcription/monthly_subcription.dart';
 import 'package:lawyer/screens/subcription/subcription_page.dart';
 import 'package:lawyer/services/auth_services.dart';
 import 'package:provider/provider.dart';
@@ -17,7 +18,7 @@ class AppMainScreen extends StatefulWidget {
 }
 
 class _AppMainScreenState extends State<AppMainScreen> {
-  int currentIndex = 0;
+  int currentIndex = 1;
   bool isLoading = false;
 
 
@@ -90,7 +91,7 @@ class _AppMainScreenState extends State<AppMainScreen> {
                   ),
                   child: TextButton(
                     onPressed: () {
-                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => SubcriptionPage(),));
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MonthlySubcription(),));
                     },
                     child: Text(
                       "Subscribe",
@@ -151,7 +152,7 @@ class _AppMainScreenState extends State<AppMainScreen> {
         return;
       }
 
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) =>
@@ -177,7 +178,11 @@ class _AppMainScreenState extends State<AppMainScreen> {
     return Stack(
       children: [
         Scaffold(
-          body: _pages[currentIndex],
+          body: Padding(
+            padding: const EdgeInsets.only(bottom: 50),
+            child: _pages[currentIndex],
+          ),
+
 
           bottomNavigationBar: Container(
             height: 90,
@@ -204,7 +209,14 @@ class _AppMainScreenState extends State<AppMainScreen> {
                     child: Container(
                       height: 110,
                       width: 110,
-                      alignment: Alignment.center,
+                      padding: EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [Color(0xff655F2E), Color(0xffD3A62A)],
+                        ),
+                      ),
+
                       child: CircleAvatar(
                         radius: 50,
                         backgroundColor: const Color(0XFFFBF6EA),
@@ -212,7 +224,7 @@ class _AppMainScreenState extends State<AppMainScreen> {
                           radius: 30,
                           backgroundColor: const Color(0XFFFBF6EA),
                           child: InkWell(
-                            onTap: _onAiTap, // 👈 UPDATED
+                            onTap: _onAiTap,
                             child: Image.asset(
                               "assets/images/AI avacato logo.png",
                               height: 100,
@@ -223,6 +235,7 @@ class _AppMainScreenState extends State<AppMainScreen> {
                     ),
                   ),
                 ),
+
               ],
             ),
           ),

@@ -1,7 +1,11 @@
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
+import 'package:lawyer/models/property_sale_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/company_contract.dart';
+import '../models/moveble_lease.dart';
 import '../models/my_model.dart';
 import '../models/request_model.dart';
 import '../models/signup.dart';
@@ -240,6 +244,54 @@ class ApiService {
       );
     }
   }
+  Future<ApiResponse> getEmailVerify(String email, String otp) async {
+    try {
+      final url = Uri.parse(
+        "https://yehia-api-nest.vkapsprojects.com/verifications/verify-otp",
+      );
+
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "email": email,
+          "otpCode": otp, // make sure backend expects this key
+        }),
+      ).timeout(const Duration(seconds: 15));
+
+      print("STATUS CODE: ${response.statusCode}");
+      print("RESPONSE BODY: ${response.body}");
+
+      dynamic body;
+      try {
+        body = jsonDecode(response.body);
+      } catch (_) {
+        body = null;
+      }
+
+      final isSuccess = (response.statusCode == 200 || response.statusCode == 201)
+          && (body?["success"] ?? false);
+
+      if (isSuccess) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString("email", email);
+      }
+
+      return ApiResponse(
+        success: isSuccess,
+        data: body,
+        message: body?["message"]?.toString() ?? "Something went wrong",
+        statusCode: response.statusCode,
+      );
+    } catch (e) {
+      return ApiResponse(
+        success: false,
+        data: null,
+        message: "Network Error: $e",
+        statusCode: 0,
+      );
+    }
+  }
 
   // -------------------------
   // SIGNUP API
@@ -250,7 +302,7 @@ class ApiService {
       String email,
       String password,
       String userType,
-      String otp,
+      // String otp,
       ) async {
     try {
       var url = Uri.parse(
@@ -266,7 +318,7 @@ class ApiService {
           "email": email,
           "password": password,
           "userType": userType,
-          "otp": otp,
+          // "otp": otp,
         }),
       );
 
@@ -485,6 +537,159 @@ class ApiService {
       );
     }
   }
+  //property pdf
+  Future<ApiResponse> propertyPdf(PropertySaleContract request) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("access_token");
+
+      final url = Uri.parse(
+        "https://yehia-api-nest.vkapsprojects.com//pdf/export-property-sale-contract",
+      );
+
+      final response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode(request.toJson()),
+      );
+
+      print("PDF STATUS => ${response.statusCode}");
+
+      if (response.statusCode != 200) {
+        return ApiResponse(
+          success: false,
+          data: null,
+          message: "Failed to generate PDF",
+          statusCode: response.statusCode,
+        );
+      }
+
+      // 🔥 PDF BYTES
+      return ApiResponse(
+        success: true,
+        data: response.bodyBytes, // 👈 IMPORTANT
+        message: "PDF generated successfully",
+        statusCode: 200,
+      );
+    } catch (e) {
+      return ApiResponse(
+        success: false,
+        data: null,
+        message: "Network Error: $e",
+        statusCode: 0,
+      );
+    }
+  }
+  //moveble pdf
+  Future<ApiResponse> moveblePdf(CraneContractModel request) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("access_token");
+
+      final url = Uri.parse(
+        "https://yehia-api-nest.vkapsprojects.com//pdf/export-movable-lease",
+      );
+
+      final response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode(request.toJson()),
+      );
+
+      print("PDF STATUS => ${response.statusCode}");
+
+      if (response.statusCode != 200) {
+        return ApiResponse(
+          success: false,
+          data: null,
+          message: "Failed to generate PDF",
+          statusCode: response.statusCode,
+        );
+      }
+
+      // 🔥 PDF BYTES
+      return ApiResponse(
+        success: true,
+        data: response.bodyBytes, // 👈 IMPORTANT
+        message: "PDF generated successfully",
+        statusCode: 200,
+      );
+    } catch (e) {
+      return ApiResponse(
+        success: false,
+        data: null,
+        message: "Network Error: $e",
+        statusCode: 0,
+      );
+    }
+  }
+  Future<ApiResponse> companyPdf(CompanyContractModel request) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("access_token");
+
+      if (token == null || token.isEmpty) {
+        return ApiResponse(
+          success: false,
+          data: null,
+          message: "Unauthorized: Token missing",
+          statusCode: 401,
+        );
+      }
+
+      final url = Uri.parse(
+        "https://yehia-api-nest.vkapsprojects.com/pdf/export-article-of-association",
+      );
+
+      final response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+          "Accept": "application/pdf",
+        },
+        body: jsonEncode(request.toJson()),
+      );
+
+      debugPrint("PDF STATUS => ${response.statusCode}");
+
+      if (response.statusCode != 200) {
+        return ApiResponse(
+          success: false,
+          data: null,
+          message: "Failed to generate PDF",
+          statusCode: response.statusCode,
+        );
+      }
+
+      return ApiResponse(
+        success: true,
+        data: response.bodyBytes, // ✅ PDF bytes
+        message: "PDF generated successfully",
+        statusCode: 200,
+      );
+    } catch (e) {
+      return ApiResponse(
+        success: false,
+        data: null,
+        message: "Network Error: $e",
+        statusCode: 0,
+      );
+    }
+  }
+
+
+
+
+
+
+
 
 }
 

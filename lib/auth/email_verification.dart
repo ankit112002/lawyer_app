@@ -24,6 +24,7 @@ class _EmailVerificationState extends State<EmailVerification> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: const Color(0XFF655F2E),
         centerTitle: true,
         title: const Text("Email Verification"),
       ),

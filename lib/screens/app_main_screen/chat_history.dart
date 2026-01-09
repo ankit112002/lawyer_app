@@ -4,7 +4,7 @@ import 'package:lawyer/services/auth_services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../app_main_screen/chat_screen.dart';
+import 'chat_screen.dart';
 
 class ChatHistory extends StatefulWidget {
   const ChatHistory({super.key});
@@ -24,9 +24,15 @@ class _ChatHistoryState extends State<ChatHistory> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: const Color(0XFF655F2E),
+
         centerTitle: true,
-        title: Text("Chat History"),
+        title: Text("Chat History",style: TextStyle(color: Colors.white),),
+        iconTheme: const IconThemeData(
+          color: Colors.white, // Back button color
+        ),
       ),
+
       body: Consumer<ApiProvider>(
         builder: (context, provider, child) {
 
@@ -52,7 +58,7 @@ class _ChatHistoryState extends State<ChatHistory> {
               final chat = provider.chatList[index];
 
               return ListTile(
-                leading: const Icon(Icons.chat_bubble_outline),
+                leading: const Icon(Icons.arrow_circle_left_outlined),
                 title: Text(chat["chat_name"] ?? "New Chat"),
                 //  title: Text(
                 //    chat["history"].isEmpty
@@ -114,19 +120,41 @@ class _ChatHistoryState extends State<ChatHistory> {
 
                     /// DELETE BUTTON
                     IconButton(
-                      icon: Icon(Icons.delete),
-                      onPressed: () async{
-                        // String? email=await AuthService.getSavedEmail();
-                        var pref=await SharedPreferences.getInstance();
-                        var email=pref.getString("email");
+                      icon: const Icon(Icons.delete),
+                      onPressed: () async {
+                        var pref = await SharedPreferences.getInstance();
+                        var email = pref.getString("email");
 
-                        Provider.of<ApiProvider>(context, listen: false).deleteChat(
+                        await Provider.of<ApiProvider>(
+                          context,
+                          listen: false,
+                        ).deleteChat(
                           context,
                           email.toString(),
                           chat["chat_id"],
                         );
+
+                        // 🔔 TOP SnackBar
+                        ScaffoldMessenger.of(context).clearSnackBars();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text(
+                              "Chat deleted successfully",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            backgroundColor: Colors.redAccent,
+                            behavior: SnackBarBehavior.floating,
+                            margin: EdgeInsets.only(
+                              top: MediaQuery.of(context).padding.top + kToolbarHeight + 10,
+                              left: 16,
+                              right: 16,
+                            ),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
                       },
                     ),
+
                   ],
                 ),
 
@@ -141,6 +169,55 @@ class _ChatHistoryState extends State<ChatHistory> {
                   );
                 },
               );
+              // return Column(
+              //   children: [
+              //     InkWell(
+              //       onTap: () {
+              //         Navigator.push(
+              //           context,
+              //           MaterialPageRoute(
+              //             builder: (_) => ChatScreen(
+              //               chat_id: chat["chat_id"],
+              //             ),
+              //           ),
+              //         );
+              //       },
+              //       child: Container(
+              //         width: double.infinity,
+              //         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+              //         color: index == 0
+              //             ? const Color(0xFFF7F3E8) // 👈 highlighted first item
+              //             : Colors.transparent,
+              //         child: Row(
+              //           crossAxisAlignment: CrossAxisAlignment.start,
+              //           children: [
+              //             // 🔹 LEFT ARROW ICON
+              //             const Icon(
+              //               Icons.arrow_circle_left_outlined,
+              //               color: Color(0xFF655F2E),
+              //             ),
+              //             const SizedBox(width: 12),
+              //
+              //             // 🔹 QUESTION TEXT
+              //             Expanded(
+              //               child: Text(
+              //                 chat["chat_name"] ?? "New Chat",
+              //                 style: const TextStyle(
+              //                   fontSize: 16,
+              //                   height: 1.4,
+              //                 ),
+              //               ),
+              //             ),
+              //           ],
+              //         ),
+              //       ),
+              //     ),
+              //
+              //     // 🔹 DIVIDER
+              //     const Divider(height: 1),
+              //   ],
+              // );
+
             },
           );
         },

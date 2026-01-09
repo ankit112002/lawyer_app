@@ -46,6 +46,7 @@ dependencies:
   pdf: ^3.10.7
   printing: ^5.12.0
   flutter_secure_storage: ^10.0.0
+  in_app_purchase:
 
 dev_dependencies:
   flutter_test:
